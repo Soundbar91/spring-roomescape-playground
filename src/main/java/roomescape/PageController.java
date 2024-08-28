@@ -11,4 +11,9 @@ public class PageController {
         return "home";
     }
 
+    @GetMapping("/reservation")
+    public String reservationMainPage() {
+        return "reservation";
+    }
+
 }

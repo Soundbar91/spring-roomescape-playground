@@ -44,7 +44,7 @@ public class ReservationController {
         Reservation reservation = reservations.stream()
                 .filter(r -> Objects.equals(r.getId(), id))
                 .findFirst()
-                .orElseThrow(() -> new IllegalAccessException("존재하지 않는 정보입니다"));
+                .orElseThrow(() -> new IllegalAccessException("존재하지 않는 예약 정보입니다"));
 
         reservations.remove(reservation);
         return ResponseEntity.noContent().build();

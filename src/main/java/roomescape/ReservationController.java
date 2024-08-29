@@ -1,10 +1,12 @@
 package roomescape;
 
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.atomic.AtomicLong;
 
 @RestController
@@ -13,15 +15,26 @@ public class ReservationController {
     private List<Reservation> reservations = new ArrayList<>();
     private final AtomicLong index = new AtomicLong(1);
 
+    @PostMapping("/reservations")
+    public ResponseEntity<Reservation> createReservation(
+            @RequestBody RequestCreateReservation requestCreateReservation
+    ) {
+        Reservation reservation = requestCreateReservation.toReservation(index.getAndIncrement());
+
+        reservations.add(reservation);
+        return ResponseEntity.created(URI.create("/reservations/" + reservation.getId())).body(reservation);
+    }
+
     @GetMapping("/reservations")
     public List<Reservation> getReservations() {
-        Reservation reservation1 = new Reservation(index.getAndIncrement(), "브라움");
-        reservations.add(reservation1);
-
-        Reservation reservation2 = new Reservation(index.getAndIncrement(), "관규");
-        reservations.add(reservation2);
-
         return reservations;
     }
 
+    @DeleteMapping("/reservations/{id}")
+    public ResponseEntity<Void> deleteReservation(
+            @PathVariable Long id
+    ) {
+        reservations.removeIf(reservation -> Objects.equals(reservation.getId(), id));
+        return ResponseEntity.noContent().build();
+    }
 }

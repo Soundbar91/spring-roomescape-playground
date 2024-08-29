@@ -1,38 +1,35 @@
 package roomescape;
 
-import java.time.LocalDate;
-import java.time.LocalTime;
-
 public class Reservation {
 
     private Long id;
     private String name;
-    private LocalDate data;
-    private LocalTime time;
+    private String date;
+    private String time;
 
     public Reservation() {
     }
 
-    public Reservation(Long id, String name) {
+    public Reservation(Long id, String name, String date, String time) {
         this.id = id;
         this.name = name;
-        data = LocalDate.now();
-        time = LocalTime.now();
+        this.date = date;
+        this.time = time;
+    }
+
+    public Long getId() {
+        return id;
     }
 
     public String getName() {
         return name;
     }
 
-    public LocalDate getData() {
-        return data;
+    public String getDate() {
+        return date;
     }
 
-    public LocalTime getTime() {
+    public String getTime() {
         return time;
-    }
-
-    public Long getId() {
-        return id;
     }
 }

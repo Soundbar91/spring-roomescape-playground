@@ -14,7 +14,7 @@ public record ResponseReservation(
     @JsonFormat(pattern = "yyyy-MM-dd")
     LocalDate date,
 
-    @JsonFormat(pattern = "HH-mm")
+    @JsonFormat(pattern = "HH:mm")
     LocalTime time
 ) {
     public static ResponseReservation of(Reservation reservation) {

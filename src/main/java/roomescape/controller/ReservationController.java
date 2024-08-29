@@ -1,7 +1,10 @@
-package roomescape;
+package roomescape.controller;
 
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import roomescape.dto.RequestCreateReservation;
+import roomescape.domain.Reservation;
 
 import java.net.URI;
 import java.util.ArrayList;
@@ -17,7 +20,7 @@ public class ReservationController {
 
     @PostMapping("/reservations")
     public ResponseEntity<Reservation> createReservation(
-            @RequestBody RequestCreateReservation requestCreateReservation
+            @Valid @RequestBody RequestCreateReservation requestCreateReservation
     ) {
         Reservation reservation = requestCreateReservation.toReservation(index.getAndIncrement());
 
@@ -33,8 +36,13 @@ public class ReservationController {
     @DeleteMapping("/reservations/{id}")
     public ResponseEntity<Void> deleteReservation(
             @PathVariable Long id
-    ) {
-        reservations.removeIf(reservation -> Objects.equals(reservation.getId(), id));
+    ) throws IllegalAccessException {
+        Reservation reservation = reservations.stream()
+                .filter(r -> Objects.equals(r.getId(), id))
+                .findFirst()
+                .orElseThrow(() -> new IllegalAccessException("존재하지 않는 정보입니다"));
+
+        reservations.remove(reservation);
         return ResponseEntity.noContent().build();
     }
 }

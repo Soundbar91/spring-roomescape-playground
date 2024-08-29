@@ -5,6 +5,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import roomescape.dto.RequestCreateReservation;
 import roomescape.domain.Reservation;
+import roomescape.dto.ResponseReservation;
 
 import java.net.URI;
 import java.util.ArrayList;
@@ -15,22 +16,25 @@ import java.util.concurrent.atomic.AtomicLong;
 @RestController
 public class ReservationController {
 
-    private List<Reservation> reservations = new ArrayList<>();
+    private final List<Reservation> reservations = new ArrayList<>();
     private final AtomicLong index = new AtomicLong(1);
 
     @PostMapping("/reservations")
-    public ResponseEntity<Reservation> createReservation(
+    public ResponseEntity<ResponseReservation> createReservation(
             @Valid @RequestBody RequestCreateReservation requestCreateReservation
     ) {
         Reservation reservation = requestCreateReservation.toReservation(index.getAndIncrement());
-
         reservations.add(reservation);
-        return ResponseEntity.created(URI.create("/reservations/" + reservation.getId())).body(reservation);
+
+        return ResponseEntity
+                .created(URI.create("/reservations/" + reservation.getId()))
+                .body(ResponseReservation.of(reservation));
     }
 
     @GetMapping("/reservations")
-    public List<Reservation> getReservations() {
-        return reservations;
+    public ResponseEntity<List<ResponseReservation>> getReservations() {
+        List<ResponseReservation> reservationList = reservations.stream().map(ResponseReservation::of).toList();
+        return ResponseEntity.ok(reservationList);
     }
 
     @DeleteMapping("/reservations/{id}")

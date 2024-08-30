@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.NoSuchElementException;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
@@ -35,8 +36,8 @@ public class GlobalExceptionHandler {
         }
     }
 
-    @ExceptionHandler(IllegalAccessException.class)
-    public ResponseEntity<String> IllegalAccessException(IllegalAccessException e) {
+    @ExceptionHandler(NoSuchElementException.class)
+    public ResponseEntity<String> NoSuchElementException(NoSuchElementException e) {
         return ResponseEntity.badRequest().body(e.getMessage());
     }
 }

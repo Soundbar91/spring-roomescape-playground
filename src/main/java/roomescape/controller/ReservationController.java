@@ -12,6 +12,7 @@ import roomescape.dto.ResponseReservation;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -42,11 +43,11 @@ public class ReservationController {
     @DeleteMapping("/reservations/{id}")
     public ResponseEntity<Void> deleteReservation(
         @PathVariable Long id
-    ) throws IllegalAccessException {
+    ) {
         Reservation reservation = reservations.stream()
             .filter(r -> Objects.equals(r.getId(), id))
             .findFirst()
-            .orElseThrow(() -> new IllegalAccessException("존재하지 않는 예약 정보입니다"));
+            .orElseThrow(() -> new NoSuchElementException("존재하지 않는 예약 정보입니다"));
 
         reservations.remove(reservation);
         return ResponseEntity.noContent().build();

@@ -1,14 +1,12 @@
 package roomescape.dto;
 
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
+import java.time.LocalDate;
+import java.time.LocalTime;
 
 import org.springframework.format.annotation.DateTimeFormat;
 
-import roomescape.domain.Reservation;
-
-import java.time.LocalDate;
-import java.time.LocalTime;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 
 public record RequestCreateReservation(
     @NotBlank(message = "이름은 필수 입력사항 입니다.")
@@ -22,12 +20,4 @@ public record RequestCreateReservation(
     @DateTimeFormat(pattern = "HH-mm")
     LocalTime time
 ) {
-    public Reservation toReservation(Long id) {
-        return new Reservation(
-            id,
-            this.name,
-            this.date,
-            this.time
-        );
-    }
 }

@@ -10,7 +10,7 @@ import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
 
-import roomescape.domain.Reservation;
+import roomescape.entity.Reservation;
 import roomescape.dto.RequestCreateReservation;
 import roomescape.dto.ResponseReservation;
 import roomescape.mapper.ReservationMapper;

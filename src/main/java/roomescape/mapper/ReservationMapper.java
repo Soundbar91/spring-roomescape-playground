@@ -2,7 +2,7 @@ package roomescape.mapper;
 
 import org.springframework.stereotype.Component;
 
-import roomescape.domain.Reservation;
+import roomescape.entity.Reservation;
 import roomescape.dto.RequestCreateReservation;
 import roomescape.dto.ResponseReservation;
 

@@ -1,13 +1,13 @@
 package roomescape.dao;
 
-import java.sql.PreparedStatement;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
 
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.support.GeneratedKeyHolder;
-import org.springframework.jdbc.support.KeyHolder;
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
+import org.springframework.jdbc.core.namedparam.SqlParameterSource;
+import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
 
 import roomescape.domain.Reservation;
@@ -20,26 +20,25 @@ public class ReservationDao {
 
     private final ReservationMapper reservationMapper;
     private final JdbcTemplate jdbcTemplate;
+    private final SimpleJdbcInsert jdbcInsert;
 
     public ReservationDao(ReservationMapper reservationMapper, JdbcTemplate jdbcTemplate) {
         this.reservationMapper = reservationMapper;
         this.jdbcTemplate = jdbcTemplate;
+        this.jdbcInsert = new SimpleJdbcInsert(jdbcTemplate)
+            .withTableName("reservation")
+            .usingGeneratedKeyColumns("id");
     }
 
     public ResponseReservation createReservation(RequestCreateReservation requestCreateReservation) {
-        String sql = "INSERT INTO RESERVATION(name, date, time) VALUES (?, ?, ?)";
-        KeyHolder keyHolder = new GeneratedKeyHolder();
-
-        jdbcTemplate.update(connection -> {
-            PreparedStatement ps = connection.prepareStatement(sql, new String[] {"id"});
-            ps.setString(1, requestCreateReservation.name());
-            ps.setString(2, requestCreateReservation.date().toString());
-            ps.setString(3, requestCreateReservation.time().toString());
-            return ps;
-        }, keyHolder);
+        SqlParameterSource params = new MapSqlParameterSource()
+            .addValue("name", requestCreateReservation.name())
+            .addValue("date", requestCreateReservation.date().toString())
+            .addValue("time", requestCreateReservation.time().toString());
+        Long id = jdbcInsert.executeAndReturnKey(params).longValue();
 
         return reservationMapper.toResponse(
-            reservationMapper.toEntity(keyHolder.getKey().longValue(), requestCreateReservation)
+            reservationMapper.toEntity(id, requestCreateReservation)
         );
     }
 

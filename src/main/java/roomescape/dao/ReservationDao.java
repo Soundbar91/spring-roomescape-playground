@@ -53,9 +53,9 @@ public class ReservationDao {
             ));
     }
 
-    public int deleteReservation(Long id) {
+    public boolean deleteReservation(Long id) {
         String sql = "DELETE FROM RESERVATION WHERE id = ?";
-        return jdbcTemplate.update(sql, id);
+        return jdbcTemplate.update(sql, id) != 0;
     }
 
 }

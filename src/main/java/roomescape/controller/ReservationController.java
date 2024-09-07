@@ -49,7 +49,7 @@ public class ReservationController {
     public ResponseEntity<Void> deleteReservation(
         @PathVariable Long id
     ) {
-        if (reservationDao.deleteReservation(id) == 0) {
+        if (!reservationDao.deleteReservation(id)) {
             throw new NoSuchElementException("존재하지 않는 예약 정보입니다");
         }
 

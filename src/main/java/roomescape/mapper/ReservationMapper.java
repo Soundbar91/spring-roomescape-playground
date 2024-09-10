@@ -2,7 +2,7 @@ package roomescape.mapper;
 
 import org.springframework.stereotype.Component;
 
-import roomescape.domain.Reservation;
+import roomescape.entity.Reservation;
 import roomescape.dto.RequestCreateReservation;
 import roomescape.dto.ResponseReservation;
 
@@ -14,11 +14,36 @@ public class ReservationMapper {
             return null;
         }
 
-        return new Reservation(
+        return Reservation.builder()
+            .id(id)
+            .name(requestCreateReservation.name())
+            .date(requestCreateReservation.date())
+            .time(requestCreateReservation.time())
+            .build();
+    }
+
+    public Reservation toEntity(RequestCreateReservation requestCreateReservation) {
+        if (requestCreateReservation == null) {
+            return null;
+        }
+
+        return Reservation.builder()
+            .name(requestCreateReservation.name())
+            .date(requestCreateReservation.date())
+            .time(requestCreateReservation.time())
+            .build();
+    }
+
+    public ResponseReservation toResponse(Long id, Reservation reservation) {
+        if (reservation == null) {
+            return null;
+        }
+
+        return new ResponseReservation(
             id,
-            requestCreateReservation.name(),
-            requestCreateReservation.date(),
-            requestCreateReservation.time()
+            reservation.getName(),
+            reservation.getDate(),
+            reservation.getTime()
         );
     }
 

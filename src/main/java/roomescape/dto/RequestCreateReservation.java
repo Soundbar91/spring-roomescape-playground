@@ -17,7 +17,7 @@ public record RequestCreateReservation(
     LocalDate date,
 
     @NotNull(message = "시간은 필수 입력사항 입니다.")
-    @DateTimeFormat(pattern = "HH-mm")
+    @DateTimeFormat(pattern = "HH:mm")
     LocalTime time
 ) {
 }

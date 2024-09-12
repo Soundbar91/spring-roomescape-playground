@@ -39,17 +39,20 @@ public class TimeDao {
 
     public Time getTimeById(Long id) {
         String sql = "SELECT * FROM TIME WHERE ID = ?";
+
         return jdbcTemplate.queryForObject(sql, timeRowMapper, id);
     }
 
     public List<Time> getTimes() {
         String sql = "SELECT * FROM TIME";
+
         return jdbcTemplate.query(sql, timeRowMapper);
     }
 
-    public void deleteTime(Long id) {
+    public boolean deleteTime(Long id) {
         String sql = "DELETE FROM TIME WHERE id = ?";
-        jdbcTemplate.update(sql, id);
+
+        return jdbcTemplate.update(sql, id) != 0;
     }
 
     private final RowMapper<Time> timeRowMapper = (rs, rowNum) -> new Time(

@@ -12,30 +12,25 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import roomescape.dao.TimeDao;
 import roomescape.dto.RequestCreateTime;
 import roomescape.dto.ResponseTime;
-import roomescape.entity.Time;
-import roomescape.mapper.TimeMapper;
+import roomescape.service.TimeService;
 
 @RestController
 @RequestMapping("/times")
 public class TimeController {
 
-    private final TimeMapper timeMapper;
-    private final TimeDao timeDao;
+    private final TimeService timeService;
 
-    public TimeController(TimeMapper timeMapper, TimeDao timeDao) {
-        this.timeMapper = timeMapper;
-        this.timeDao = timeDao;
+    public TimeController(TimeService timeService) {
+        this.timeService = timeService;
     }
 
     @PostMapping
     public ResponseEntity<ResponseTime> createTime(
         @RequestBody RequestCreateTime requestCreateTime
     ) {
-        Time time = timeDao.createTime(timeMapper.toEntity(requestCreateTime));
-        ResponseTime responseTime = timeMapper.toResponse(time);
+        ResponseTime responseTime = timeService.createTime(requestCreateTime);
 
         return ResponseEntity
             .created(URI.create("/times/" + responseTime.id()))
@@ -44,9 +39,7 @@ public class TimeController {
 
     @GetMapping
     public ResponseEntity<List<ResponseTime>> getTimes() {
-        List<ResponseTime> responseTimes = timeDao.getTimes().stream()
-            .map(timeMapper::toResponse)
-            .toList();
+        List<ResponseTime> responseTimes = timeService.getTimes();
 
         return ResponseEntity.ok(responseTimes);
     }
@@ -55,7 +48,8 @@ public class TimeController {
     public ResponseEntity<Void> deleteTime(
         @PathVariable Long id
     ) {
-        timeDao.deleteTime(id);
+        timeService.deleteTime(id);
+
         return ResponseEntity.noContent().build();
     }
 }

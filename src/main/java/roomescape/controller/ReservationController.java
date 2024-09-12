@@ -15,24 +15,39 @@ import org.springframework.web.bind.annotation.RestController;
 
 import jakarta.validation.Valid;
 import roomescape.dao.ReservationDao;
+import roomescape.dao.TimeDao;
 import roomescape.dto.RequestCreateReservation;
 import roomescape.dto.ResponseReservation;
+import roomescape.entity.Reservation;
+import roomescape.entity.Time;
+import roomescape.mapper.ReservationMapper;
 
 @RequestMapping("/reservations")
 @RestController
 public class ReservationController {
 
+    private final ReservationMapper reservationMapper;
     private final ReservationDao reservationDao;
+    private final TimeDao timeDao;
 
-    public ReservationController(ReservationDao reservationDao) {
+    public ReservationController(ReservationMapper reservationMapper, ReservationDao reservationDao, TimeDao timeDao) {
+        this.reservationMapper = reservationMapper;
         this.reservationDao = reservationDao;
+        this.timeDao = timeDao;
     }
 
     @PostMapping
     public ResponseEntity<ResponseReservation> createReservation(
         @Valid @RequestBody RequestCreateReservation requestCreateReservation
     ) {
-        ResponseReservation responseReservation = reservationDao.createReservation(requestCreateReservation);
+        Time time = timeDao.getTimeById(requestCreateReservation.time());
+        if (time == null) {
+            throw new NoSuchElementException("예약 시간이 존재하지 않습니다.");
+        }
+
+        Reservation reservation = reservationDao.createReservation(
+            reservationMapper.toEntity(requestCreateReservation, time));
+        ResponseReservation responseReservation = reservationMapper.toResponse(reservation);
 
         return ResponseEntity
             .created(URI.create("/reservations/" + responseReservation.id()))
@@ -41,7 +56,10 @@ public class ReservationController {
 
     @GetMapping
     public ResponseEntity<List<ResponseReservation>> getReservations() {
-        List<ResponseReservation> responseReservations = reservationDao.getReservations();
+        List<ResponseReservation> responseReservations = reservationDao.getReservations().stream()
+            .map(reservationMapper::toResponse)
+            .toList();
+
         return ResponseEntity.ok(responseReservations);
     }
 

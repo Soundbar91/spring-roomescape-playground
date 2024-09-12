@@ -6,47 +6,55 @@ import javax.sql.DataSource;
 
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
-import org.springframework.jdbc.core.namedparam.BeanPropertySqlParameterSource;
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
 
-import roomescape.dto.RequestCreateReservation;
-import roomescape.dto.ResponseReservation;
 import roomescape.entity.Reservation;
-import roomescape.mapper.ReservationMapper;
+import roomescape.entity.Time;
 
 @Repository
 public class ReservationDao {
 
-    private final ReservationMapper reservationMapper;
     private final JdbcTemplate jdbcTemplate;
     private final SimpleJdbcInsert jdbcInsert;
 
-    public ReservationDao(ReservationMapper reservationMapper, DataSource dataSource) {
-        this.reservationMapper = reservationMapper;
+    public ReservationDao(DataSource dataSource) {
         this.jdbcTemplate = new JdbcTemplate(dataSource);
         this.jdbcInsert = new SimpleJdbcInsert(dataSource)
             .withTableName("reservation")
-            .usingColumns("name", "date", "time")
+            .usingColumns("name", "date", "time_id")
             .usingGeneratedKeyColumns("id");
     }
 
-    public ResponseReservation createReservation(RequestCreateReservation requestCreateReservation) {
-        Reservation reservation = reservationMapper.toEntity(requestCreateReservation);
-
-        SqlParameterSource params = new BeanPropertySqlParameterSource(reservation);
+    public Reservation createReservation(Reservation reservation) {
+        SqlParameterSource params = new MapSqlParameterSource()
+            .addValue("name", reservation.getName())
+            .addValue("date", reservation.getDate())
+            .addValue("time_id", reservation.getTime().getId());
         Long id = jdbcInsert.executeAndReturnKey(params).longValue();
 
-        return reservationMapper.toResponse(id, reservation);
+        return Reservation.builder()
+            .id(id)
+            .name(reservation.getName())
+            .date(reservation.getDate())
+            .time(reservation.getTime())
+            .build();
     }
 
-    public List<ResponseReservation> getReservations() {
-        String sql = "SELECT * FROM RESERVATION";
+    public List<Reservation> getReservations() {
+        String sql = """
+                SELECT
+                r.id as reservation_id,
+                r.name,
+                r.date,
+                t.id as time_id,
+                t.time as time_value
+            FROM reservation as r inner join time as t on r.time_id = t.id
+            """;
 
-        return jdbcTemplate.query(sql, reservationRowMapper).stream()
-            .map(reservationMapper::toResponse)
-            .toList();
+        return jdbcTemplate.query(sql, reservationRowMapper);
     }
 
     public boolean deleteReservation(Long id) {
@@ -59,6 +67,6 @@ public class ReservationDao {
         r.getLong("id"),
         r.getString("name"),
         r.getDate("date").toLocalDate(),
-        r.getTime("time").toLocalTime()
+        Time.builder().time(r.getTime("time").toLocalTime()).build()
     );
 }

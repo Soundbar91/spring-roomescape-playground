@@ -31,28 +31,24 @@ public class TimeDao {
         SqlParameterSource params = new BeanPropertySqlParameterSource(time);
         Long id = jdbcInsert.executeAndReturnKey(params).longValue();
 
-        return Time.builder()
+        return time.toBuilder()
             .id(id)
-            .time(time.getTime())
             .build();
     }
 
-    public Time getTimeById(Long id) {
+    public Time getTime(Long id) {
         String sql = "SELECT * FROM TIME WHERE ID = ?";
-
         return jdbcTemplate.queryForObject(sql, timeRowMapper, id);
     }
 
     public List<Time> getTimes() {
         String sql = "SELECT * FROM TIME";
-
         return jdbcTemplate.query(sql, timeRowMapper);
     }
 
-    public boolean deleteTime(Long id) {
+    public void deleteTime(Long id) {
         String sql = "DELETE FROM TIME WHERE id = ?";
-
-        return jdbcTemplate.update(sql, id) != 0;
+        jdbcTemplate.update(sql, id);
     }
 
     private final RowMapper<Time> timeRowMapper = (rs, rowNum) -> new Time(

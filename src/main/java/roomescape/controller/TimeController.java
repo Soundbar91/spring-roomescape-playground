@@ -31,7 +31,6 @@ public class TimeController {
         @RequestBody RequestCreateTime requestCreateTime
     ) {
         ResponseTime responseTime = timeService.createTime(requestCreateTime);
-
         return ResponseEntity
             .created(URI.create("/times/" + responseTime.id()))
             .body(responseTime);
@@ -40,7 +39,6 @@ public class TimeController {
     @GetMapping
     public ResponseEntity<List<ResponseTime>> getTimes() {
         List<ResponseTime> responseTimes = timeService.getTimes();
-
         return ResponseEntity.ok(responseTimes);
     }
 
@@ -49,7 +47,6 @@ public class TimeController {
         @PathVariable Long id
     ) {
         timeService.deleteTime(id);
-
         return ResponseEntity.noContent().build();
     }
 }

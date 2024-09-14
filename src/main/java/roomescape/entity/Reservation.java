@@ -16,7 +16,7 @@ public class Reservation {
     private LocalDate date;
     private Time time;
 
-    @Builder
+    @Builder(toBuilder = true)
     public Reservation(Long id, String name, LocalDate date, Time time) {
         this.id = id;
         this.name = name;

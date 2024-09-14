@@ -16,36 +16,38 @@ import roomescape.mapper.ReservationMapper;
 @Service
 public class ReservationService {
 
-    private final ReservationMapper reservationMapper;
     private final ReservationDao reservationDao;
     private final TimeDao timeDao;
 
-    public ReservationService(ReservationMapper reservationMapper, ReservationDao reservationDao, TimeDao timeDao) {
-        this.reservationMapper = reservationMapper;
+    public ReservationService(ReservationDao reservationDao, TimeDao timeDao) {
         this.reservationDao = reservationDao;
         this.timeDao = timeDao;
     }
 
     public ResponseReservation createReservation(RequestCreateReservation requestCreateReservation) {
-        Time time = timeDao.getTimeById(requestCreateReservation.time());
+        Time time = timeDao.getTime(requestCreateReservation.time());
         if (time == null) {
             throw new NoSuchElementException("예약 시간이 존재하지 않습니다.");
         }
 
         Reservation reservation = reservationDao.createReservation(
-            reservationMapper.toEntity(requestCreateReservation, time));
-        return reservationMapper.toResponse(reservation);
+            ReservationMapper.toEntity(requestCreateReservation, time));
+
+        return ReservationMapper.toResponse(reservation);
     }
 
     public List<ResponseReservation> getReservations() {
         return reservationDao.getReservations().stream()
-            .map(reservationMapper::toResponse)
+            .map(ReservationMapper::toResponse)
             .toList();
     }
 
     public void deleteReservation(Long id) {
-        if (!reservationDao.deleteReservation(id)) {
+        Reservation reservation = reservationDao.getReservation(id);
+        if (reservation == null) {
             throw new NoSuchElementException("존재하지 않는 예약 정보입니다");
         }
+
+        reservationDao.deleteReservation(id);
     }
 }

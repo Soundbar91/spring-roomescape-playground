@@ -14,7 +14,7 @@ public class Time {
     private Long id;
     private LocalTime time;
 
-    @Builder
+    @Builder(toBuilder = true)
     public Time(Long id, LocalTime time) {
         this.id = id;
         this.time = time;

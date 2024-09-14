@@ -29,18 +29,27 @@ public class ReservationDao {
     }
 
     public Reservation createReservation(Reservation reservation) {
-        SqlParameterSource params = new MapSqlParameterSource()
-            .addValue("name", reservation.getName())
-            .addValue("date", reservation.getDate())
-            .addValue("time_id", reservation.getTime().getId());
+        SqlParameterSource params = getParams(reservation);
         Long id = jdbcInsert.executeAndReturnKey(params).longValue();
 
-        return Reservation.builder()
+        return reservation.toBuilder()
             .id(id)
-            .name(reservation.getName())
-            .date(reservation.getDate())
-            .time(reservation.getTime())
             .build();
+    }
+
+    public Reservation getReservation(Long id) {
+        String sql = """
+                SELECT
+                r.id as reservation_id,
+                r.name,
+                r.date,
+                t.id as time_id,
+                t.time as time_value
+            FROM reservation as r inner join time as t on r.time_id = t.id
+            WHERE r.reservation_id = :reservation_id
+            """;
+
+        return jdbcTemplate.queryForObject(sql, reservationRowMapper, id);
     }
 
     public List<Reservation> getReservations() {
@@ -57,16 +66,25 @@ public class ReservationDao {
         return jdbcTemplate.query(sql, reservationRowMapper);
     }
 
-    public boolean deleteReservation(Long id) {
+    public void deleteReservation(Long id) {
         String sql = "DELETE FROM RESERVATION WHERE id = ?";
-
-        return jdbcTemplate.update(sql, id) != 0;
+        jdbcTemplate.update(sql, id);
     }
 
     private final RowMapper<Reservation> reservationRowMapper = (r, rowNum) -> new Reservation(
-        r.getLong("id"),
+        r.getLong("reservation_id"),
         r.getString("name"),
         r.getDate("date").toLocalDate(),
-        Time.builder().time(r.getTime("time").toLocalTime()).build()
+        Time.builder()
+            .id(r.getLong("time_id"))
+            .time(r.getTime("time_value").toLocalTime())
+            .build()
     );
+
+    private static MapSqlParameterSource getParams(Reservation reservation) {
+        return new MapSqlParameterSource()
+            .addValue("name", reservation.getName())
+            .addValue("date", reservation.getDate())
+            .addValue("time_id", reservation.getTime().getId());
+    }
 }
